@@ -27,46 +27,42 @@ class Router
         $uri = $_SERVER['REQUEST_URI'];
         $method = $_SERVER['REQUEST_METHOD'];
 
-        
+
         foreach ($this->routes[$method] as $path => $callback) {
-            // var_dump($callback);
-            // if($uri != $path ) continue ;
 
-            // $callback();
-            
-            // return ;
 
-             $routeRegex = preg_replace_callback('/{\w+(:([^}]+))?}/', function ($matches)
-            {
+            $routeRegex = preg_replace_callback('/{\w+(:([^}]+))?}/', function ($matches) {
                 return isset($matches[1]) ? '(' . $matches[2] . ')' : '([a-zA-Z0-9_-]+)';
             }, $path);
 
-          
 
-            //  echo "<pre>";
-            // var_dump($routeRegex);
-            // echo "</pre>";
 
             // Add the start and end delimiters.
             $routeRegex = '@^' . $routeRegex . '$@';
 
             // Check if the requested route matches the current route pattern.
-            if (preg_match($routeRegex, $uri, $matches))
-            {
+            if (preg_match($routeRegex, $uri, $matches)) {
                 // Get all user requested path params values after removing the first matches.
                 array_shift($matches);
-                call_user_func_array($callback,$matches);
-            // $callback($matches);
-                return ;
 
+                if (is_callable($callback)) {
+                    call_user_func_array($callback, $matches);
 
+                    return;
+                }
+                if (is_array($callback)) {
+                    [$controller, $methodName] = $callback;
+
+                    $instanceController = new $controller();
+
+                    call_user_func_array([$instanceController,$methodName], $matches);
+                    return ;
+                }
             }
-
         }
-        if($this->routes["GET"]['/404']){
+        if ($this->routes["GET"]['/404']) {
             $callback();
         }
-        
     }
 }
 
