@@ -11,7 +11,9 @@ $router = new Router();
 $router->get("/user/{id}/{user}", function ($id, $user) {
     include '../views/user.php';
 });
-$router->get("/login/{id}", [AuthController::class, "showLogin"]);
+$router->get("/login", [AuthController::class, "showLogin"]);
+$router->post("/creat", [AuthController::class, "login"]);
+$router->get("/dashboard", [AuthController::class, "index"]);
 
 
 $router->get("/404", function () {
